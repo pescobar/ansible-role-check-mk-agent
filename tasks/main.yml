@@ -13,7 +13,7 @@
 - name: Configure xinetd to only accept connections from {{ check_mk_monitoring_allowed_ips }}
   lineinfile:
     dest: "/etc/xinetd.d/check_mk"
-    regexp: "^only_from"
+    regexp: "^(\t)#only_from(.*)$"
     line: "only_from = {{ check_mk_monitoring_allowed_ips }}"
   notify: restart xinetd
 
