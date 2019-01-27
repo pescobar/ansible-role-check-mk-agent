@@ -1,0 +1,75 @@
+---
+
+- name: install xinetd
+  yum:
+    name: xinetd
+    state: present
+
+- name: install check_mk agent RPM
+  yum:
+    name: "{{ check_mk_rpm_download_url }}/check-mk-agent-{{ check_mk_agent_version }}.noarch.rpm"
+    state: present
+
+- name: Configure xinetd to only accept connections from {{ check_mk_monitoring_allowed_ips }}
+  lineinfile:
+    dest: "/etc/xinetd.d/check_mk"
+    regexp: "^only_from"
+    line: "only_from = {{ check_mk_monitoring_allowed_ips }}"
+  notify: restart xinetd
+
+- name: Add extra check to /usr/lib/check_mk_agent/plugins/gpfs_mounts so inventory finds gpfs and beegfs mount points
+  template:
+    src: usr/lib/check_mk_agent/plugins/gpfs_mounts
+    dest: /usr/lib/check_mk_agent/plugins/gpfs_mounts
+    owner: root
+    group: root
+    mode: 0755
+  when: check_mk_enable_beegfs_gpfs_mounts_checks
+
+- name: Add extra check to /usr/lib/check_mk_agent/plugins/nvidia_gpu for gpu machines
+  template:
+    src: usr/lib/check_mk_agent/plugins/nvidia_gpu
+    dest: /usr/lib/check_mk_agent/plugins/nvidia_gpu
+    owner: root
+    group: root
+    mode: 0755
+  when: check_mk_gpu_check
+
+- name: Start and enable the xinetd service
+  service:
+    name: xinetd
+    state: started
+    enabled: true
+
+- name: Copy the configurations for the agent plugins
+  template:
+    src: usr/lib/check_mk_agent/plugins/{{ item }}
+    dest: /usr/lib/check_mk_agent/plugins/
+    mode: 0755
+    owner: root
+    group: root
+  with_items:
+    - "{{ check_mk_agent_enabled_plugins }}"
+  when: check_mk_agent_enabled_plugins.0 is defined  # only execute this task when check_mk_agent_enabled_plugins contains elements
+
+- block:
+
+    - name: Be sure ipmitool is installed if the machine is physical
+      yum:
+        name: ipmitool
+        state: present
+
+    - name: Be sure the ipmitool kernel module is loaded if machine is physical
+      modprobe:
+        name: ipmi_devintf
+        state: present
+
+    - name: Copy config file to load ipmi module on reboot if machine is physical
+      template:
+        src: etc/sysconfig/modules/ipmi.modules
+        dest: /etc/sysconfig/modules/
+        owner: root
+        group: root
+        mode: 0755
+
+  when: ansible_virtualization_role != 'guest'

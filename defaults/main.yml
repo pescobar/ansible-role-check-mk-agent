@@ -1,0 +1,20 @@
+---
+
+check_mk_rpm_download_url: 'https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/c/check-mk-agent-1.4.0p31-2.el7.x86_64.rpm'
+
+check_mk_agent_version: '1.4.0p31-2'
+
+# list of ips which will be allowed to connect to the check_mk agent.
+# these are the two ips in the monitoring hosts
+# separate ips with an space
+check_mk_monitoring_allowed_ips: '172.16.0.8'
+
+# list of check_mk plugins we will deploy in the agent (client)
+# To see the list of available plugins do
+# "ls templates/usr/lib/check_mk_agent/plugins"
+check_mk_agent_enabled_plugins:
+#  - mk_check_updates
+
+check_mk_enable_beegfs_gpfs_mounts_checks: False
+
+check_mk_gpu_check: False

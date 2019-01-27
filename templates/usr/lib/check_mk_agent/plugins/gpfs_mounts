@@ -1,0 +1,3 @@
+#!/bin/sh
+echo '<<<mounts>>>'
+/bin/egrep "^/dev|gpfs|^beegfs" /proc/mounts | egrep -v /dev/

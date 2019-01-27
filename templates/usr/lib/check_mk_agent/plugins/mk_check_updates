@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# OUTPUT:
+# (security) (non-security) (runtime) (check age)
+# <<<updates>>>
+# 7 40 7 209
+
+# Unix time (seconds since Unix epoch)
+START=$(date +%s)
+
+TIME=
+AGE=
+
+INTERVAL=86400                          # default interval once a day
+LOG="/var/log/check_updates.log"        # default path to log file
+
+# Source config file if it exists
+if [ -e "/etc/check_mk/check_updates.cfg" ]; then
+    . /etc/check_mk/check_updates.cfg
+fi
+
+# function run_check_update
+run_check_update () {
+if which yum >/dev/null; then
+
+  if [ ! -e "/var/run/yum.pid" ]; then
+
+    cat /dev/null > $LOG
+
+    # Check for security RPMS
+    yum -v --security check-update | egrep '(i.86|x86_64|noarch)' | egrep -v '\(priority\)' |\
+ egrep -v '(^Keeping|^Removing|^Nothing|^Excluding|^Looking)' | sed 's/^.*--> //g' | while read L
+    do
+
+      RPM=$(echo $L | awk '{print $1}')
+      Q=$(echo ${L} | grep 'non-security' > /dev/null; echo $?)
+      if [ $Q -eq 0 ]; then
+        echo "non-security $RPM" >> $LOG
+      else
+        echo "security $RPM" >> $LOG
+      fi
+
+    done
+
+  fi
+fi
+}
+
+# function timeyet
+timeyet () {
+LAST=$(stat -c '%Y' $LOG)
+NOW=$(date +%s)
+AGE=$((NOW - LAST))
+[ $AGE -gt $INTERVAL ] && TIME=1 || TIME=0
+}
+
+# See if it's time to run 'yum check-updates' yet
+if [ ! -e $LOG ]; then
+  touch $LOG
+  run_check_update
+  timeyet
+else
+  timeyet
+  if [ $TIME = 1 ]; then
+    run_check_update
+    timeyet
+  fi
+fi
+
+# Gather results from log file
+SEC=$(grep '^security' $LOG | wc -l)
+NON=$(grep '^non-security' $LOG | wc -l)
+
+# Unix time (seconds since epoch)
+END=$(date +%s)
+
+RUNTIME=$((END - START))
+
+echo '<<<updates>>>'
+echo $SEC" "$NON" "$RUNTIME" "$AGE
+exit 0
