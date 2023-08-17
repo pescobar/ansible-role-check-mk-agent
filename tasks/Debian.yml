@@ -1,0 +1,8 @@
+- name: install xinetd
+  apt:
+    name: xinetd
+    state: present
+- name: install check_mk agent RPM
+  apt:
+    name: "{{ check_mk_rpm_download_url }}/check-mk-agent-{{ check_mk_agent_version }}.noarch.deb"
+    state: present

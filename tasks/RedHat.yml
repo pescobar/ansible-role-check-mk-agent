@@ -1,0 +1,10 @@
+---
+
+- name: install xinetd
+  yum:
+    name: xinetd
+    state: present
+- name: install check_mk agent RPM
+  yum:
+    name: "{{ check_mk_client_download_url }}/check-mk-agent-{{ check_mk_agent_version }}.noarch.rpm"
+    state: present

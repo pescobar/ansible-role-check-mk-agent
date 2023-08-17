@@ -1,7 +1,7 @@
 ansible-role-check-mk-agent
 =========
 
-Install and configure the check-mk monitoring agent in CentOS machines
+Install and configure the check-mk monitoring agent in CentOS and Debian machines
 
 Requirements
 ------------
