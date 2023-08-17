@@ -2,7 +2,7 @@
 
 check_mk_client_download_url: 'https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/c/'
 
-check_mk_agent_version: '1.6.0p29-1'
+check_mk_agent_version: '1.6.0p30-1'
 
 # list of ips which will be allowed to connect to the check_mk agent.
 # these are the two ips in the monitoring hosts

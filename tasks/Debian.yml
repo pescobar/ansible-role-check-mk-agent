@@ -5,5 +5,5 @@
 
 - name: install check_mk agent DEB
   apt:
-    name: "{{ check_mk_client_download_url }}/check-mk-agent-{{ check_mk_agent_version }}.noarch.deb"
+    deb: "{{ check_mk_client_download_url }}/check-mk-agent_{{ check_mk_agent_version }}_all.deb"
     state: present
