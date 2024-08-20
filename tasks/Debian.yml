@@ -1,0 +1,9 @@
+- name: install xinetd
+  apt:
+    name: xinetd
+    state: present
+
+- name: install check_mk agent DEB
+  apt:
+    deb: "{{ check_mk_client_download_url }}/check-mk-agent_{{ check_mk_agent_version }}_all.deb"
+    state: present

@@ -1,20 +1,12 @@
 ---
-
-- name: install xinetd
-  yum:
-    name: xinetd
-    state: present
-
-- name: install check_mk agent RPM
-  yum:
-    name: "{{ check_mk_rpm_download_url }}/check-mk-agent-{{ check_mk_agent_version }}.noarch.rpm"
-    state: present
+- name: Include OS Family specific Tasks.
+  include_tasks: "{{ ansible_os_family }}.yml"
 
 - name: Configure xinetd to only accept connections from {{ check_mk_monitoring_allowed_ips }}
   lineinfile:
     dest: "/etc/xinetd.d/check_mk"
-    regexp: "^(\t)#only_from(.*)$"
-    line: "only_from = {{ check_mk_monitoring_allowed_ips }}"
+    regexp: "^(\t)*(#)*only_from(.*)$"
+    line: "\tonly_from = {{ check_mk_monitoring_allowed_ips }}"
   notify: restart xinetd
 
 - name: Add extra check to /usr/lib/check_mk_agent/plugins/gpfs_mounts so inventory finds gpfs and beegfs mount points
